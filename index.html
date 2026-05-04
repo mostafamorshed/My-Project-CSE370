@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <div id="dash-date"></div>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #e8ff4b;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --success: #4bff91;
+    --danger: #ff4b6e;
+    --warning: #ffc94b;
+    --pending: #4b9fff;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+  }
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+  .logo h1 span { color: var(--accent); }
+  .logo p {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  nav { padding: 16px 12px; flex: 1; }
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 2px;
+    transition: all 0.15s;
+    font-family: var(--sans);
+  }
+  nav a:hover { background: var(--surface2); color: var(--text); }
+  nav a.active { background: var(--accent); color: #000; }
+  nav a .icon { width: 16px; text-align: center; font-size: 15px; }
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  /* Main */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    min-height: 100vh;
+    padding: 32px;
+    background: var(--bg);
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header h2 {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .page-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--sans);
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #d4eb2e; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger)22; }
+  .btn-danger:hover { background: var(--danger)22; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+  .stat-card.orange::before { background: var(--accent2); }
+  .stat-card.green::before { background: var(--success); }
+  .stat-card.red::before { background: var(--danger); }
+  .stat-card.blue::before { background: var(--pending); }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-toolbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    outline: none;
+    width: 220px;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+  select.search-input { cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--mono);
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  td {
+    padding: 14px 20px;
+    font-size: 13px;
+  }
+  .product-name { font-weight: 500; color: var(--text); }
+  .brand { color: var(--muted); font-size: 12px; margin-top: 2px; font-family: var(--mono); }
+  .price { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+  .badge-in-stock { background: var(--success)18; color: var(--success); border: 1px solid var(--success)33; }
+  .badge-low-stock { background: var(--warning)18; color: var(--warning); border: 1px solid var(--warning)33; }
+  .badge-out-stock { background: var(--danger)18; color: var(--danger); border: 1px solid var(--danger)33; }
+  .badge-confirmed { background: var(--success)18; color: var(--success); border: 1px solid var(--success)33; }
+  .badge-pending { background: var(--pending)18; color: var(--pending); border: 1px solid var(--pending)33; }
+  .badge-cancelled { background: var(--danger)18; color: var(--danger); border: 1px solid var(--danger)33; }
+  .badge-active { background: var(--accent)18; color: var(--accent); border: 1px solid var(--accent)33; }
+  .badge-completed { background: var(--success)18; color: var(--success); border: 1px solid var(--success)33; }
+
+  /* Emoji/Review colors */
+  .emoji-btn { display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border-radius:8px; }
+  .emoji-btn.bad { background: rgba(255,75,110,0.06); border: 1px solid rgba(255,75,110,0.2); color: var(--danger); }
+  .emoji-btn.ok { background: rgba(255,201,75,0.06); border: 1px solid rgba(255,201,75,0.2); color: var(--warning); }
+  .emoji-btn.good { background: rgba(75,255,145,0.06); border: 1px solid rgba(75,255,145,0.12); color: var(--success); }
+  .emoji-btn.active { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.02); }
+
+  .emoji-badge { display:inline-block;padding:6px 10px;border-radius:8px;font-family:var(--mono);font-size:13px; }
+  .emoji-badge.bad { background: rgba(255,75,110,0.06); color: var(--danger); border:1px solid rgba(255,75,110,0.18); }
+  .emoji-badge.ok { background: rgba(255,201,75,0.06); color: var(--warning); border:1px solid rgba(255,201,75,0.18); }
+  .emoji-badge.good { background: rgba(75,255,145,0.06); color: var(--success); border:1px solid rgba(75,255,145,0.12); }
+
+  /* Stars */
+  .stars { color: var(--warning); font-size: 12px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 480px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-family: var(--mono);
+  }
+  .form-control {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-control:focus { border-color: var(--accent); }
+  .form-control::placeholder { color: var(--muted); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Campaign cards (Unique Feature 1) */
+  .campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .campaign-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .campaign-card:hover { border-color: var(--accent)44; }
+  .campaign-card.completed { opacity: 0.7; }
+  .campaign-product {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .campaign-brand {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    margin-bottom: 16px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .progress-label span:first-child { color: var(--muted); font-family: var(--mono); }
+  .progress-label span:last-child { font-weight: 600; font-family: var(--mono); }
+  .progress-bar {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), #a8ff3e);
+    transition: width 0.5s ease;
+  }
+  .progress-fill.full { background: linear-gradient(90deg, var(--success), #22ff88); }
+  .campaign-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+  }
+  .countdown {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--warning);
+  }
+  .countdown.expired { color: var(--muted); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    z-index: 9999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--success)55; }
+  .toast.error { border-color: var(--danger)55; }
+
+  /* Category chips */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: border-color 0.15s;
+  }
+  .cat-card:hover { border-color: var(--accent)44; }
+  .cat-name { font-weight: 600; font-size: 15px; }
+  .cat-count { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .cat-delete { opacity: 0; transition: opacity 0.15s; }
+  .cat-card:hover .cat-delete { opacity: 1; }
+
+  /* Loading */
+  .loading {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Empty state */
+  .empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* Order detail inline */
+  .order-items-list {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 8px;
+  }
+  .order-item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .order-item-row:last-child { border-bottom: none; }
+
+  /* Responsive tweak */
+  @media (max-width: 768px) {
+    .sidebar { width: 60px; }
+    .logo h1, .logo p, nav a span, .sidebar-footer { display: none; }
+    nav a { justify-content: center; padding: 12px; }
+    .main { margin-left: 60px; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Simple Login Landing Page (shows when not authenticated) -->
+<div id="login-landing" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999">
+  <div style="background:var(--surface);padding:28px;border-radius:12px;width:420px;box-shadow:0 10px 30px rgba(0,0,0,0.6)">
+    <h2 style="margin-bottom:8px">Welcome to EzHub</h2>
+    <p style="color:var(--muted);margin-bottom:16px">Please login to continue</p>
+    <div class="form-group">
+      <label>ID</label>
+      <input class="form-control" id="landing-id" placeholder="Your unique ID" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input class="form-control" id="landing-pass" type="password" placeholder="Password" />
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+      <input type="checkbox" id="remember-me" /> <label for="remember-me" style="color:var(--muted)">Remember me</label>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-ghost" onclick="document.getElementById('landing-id').value='';document.getElementById('landing-pass').value='';">Clear</button>
+      <button class="btn btn-ghost" onclick="landingRegister()">Create account</button>
+      <button class="btn btn-primary" onclick="landingLogin()">Login</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <h1>Ez<span>Hub</span></h1>
+    <p>Admin Panel</p>
+  </div>
+  <nav>
+    <a class="nav-link active" data-page="dashboard" data-admin-only>
+      <span class="icon">⬡</span>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-link" data-page="products">
+      <span class="icon">⊞</span>
+      <span>Products</span>
+    </a>
+    <a class="nav-link" data-page="categories">
+      <span class="icon">◈</span>
+      <span>Categories</span>
+    </a>
+    <a class="nav-link" data-page="orders">
+      <span class="icon">◫</span>
+      <span>Orders</span>
+    </a>
+    <a class="nav-link" data-page="campaigns">
+      <span class="icon">⚡</span>
+      <span>Group Buys</span>
+    </a>
+    <a class="nav-link" data-page="oemdesigns">
+      <span class="icon">✦</span>
+      <span>OEM Designs</span>
+    </a>
+    <a class="nav-link" data-page="reviews">
+      <span class="icon">✎</span>
+      <span>Reviews</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" id="login-btn" onclick="document.getElementById('login-landing').style.display = ''">Login</button>
+      <button class="btn btn-ghost btn-sm" id="logout-btn" style="display:none" onclick="logout()">Logout</button>
+      <span id="user-badge" style="margin-left:8px;color:var(--muted)"></span>
+    </div>
+    <div style="margin-top:6px;font-size:11px;color:var(--muted)">v1.0 · ezhub.com</div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- ─── DASHBOARD ─── -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <h2>Dashboard</h2>
+        <p id="dash-date">Loading...</p>
+      </div>
+    </div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="spinner" style="margin:8px 0"></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
+      <div class="table-wrap" style="padding:20px">
+        <div style="font-family:var(--display);font-weight:700;font-size:16px;margin-bottom:16px">Recent Orders</div>
+        <div id="recent-orders-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+      </div>
+      <div class="table-wrap" style="padding:20px">
+        <div style="font-family:var(--display);font-weight:700;font-size:16px;margin-bottom:16px">🔥 Active Campaigns</div>
+        <div id="dash-campaigns"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PRODUCTS ─── -->
+  <div class="page" id="page-products">
+    <div class="page-header">
+      <div>
+        <h2>Products</h2>
+        <p>Manage your inventory and product listings</p>
+      </div>
+  <button class="btn btn-primary" data-admin-only onclick="openProductModal()">+ Add Product</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-input" type="text" id="product-search" placeholder="Search products..." oninput="filterProducts()"/>
+        <select class="search-input" id="cat-filter" onchange="filterProducts()" style="width:160px">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div id="products-table-wrap">
+        <div class="loading"><div class="spinner"></div>Loading products...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CATEGORIES ─── -->
+  <div class="page" id="page-categories">
+    <div class="page-header">
+      <div>
+        <h2>Categories</h2>
+        <p>Organize your product taxonomy</p>
+      </div>
+  <button class="btn btn-primary" data-admin-only onclick="openCatModal()">+ Add Category</button>
+    </div>
+    <div id="categories-wrap">
+      <div class="loading"><div class="spinner"></div>Loading categories...</div>
+    </div>
+  </div>
+
+  <!-- ─── ORDERS ─── -->
+  <div class="page" id="page-orders">
+    <div class="page-header">
+      <div>
+        <h2>Orders</h2>
+        <p>Track and manage customer orders</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <select class="search-input" id="status-filter" onchange="loadOrders()" style="width:160px">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div id="orders-table-wrap">
+        <div class="loading"><div class="spinner"></div>Loading orders...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CAMPAIGNS (Unique Feature 1) ─── -->
+  <div class="page" id="page-campaigns">
+    <div class="page-header">
+      <div>
+        <h2>⚡ Group Buy Campaigns</h2>
+        <p>Live group purchase tracker — reach the minimum to unlock the deal</p>
+      </div>
+    </div>
+    <div id="campaigns-wrap">
+      <div class="loading"><div class="spinner"></div>Loading campaigns...</div>
+    </div>
+    <!-- OEM Designs moved to its own page -->
+  </div>
+
+  <!-- ─── OEM DESIGNS ─── -->
+  <div class="page" id="page-oemdesigns">
+    <div class="page-header">
+      <div>
+        <h2>OEM Designs</h2>
+        <p>Customer-submitted design ideas — upvote/downvote the best ones</p>
+      </div>
+  <button class="btn btn-primary" onclick="openOemModal()">+ Add OEM Design</button>
+    </div>
+    <div class="table-wrap">
+      <div id="oemdesigns-wrap">
+        <div class="loading"><div class="spinner"></div>Loading OEM designs...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── REVIEWS ─── -->
+  <div class="page" id="page-reviews">
+    <div class="page-header">
+      <div>
+        <h2>Reviews</h2>
+        <p>Customer reviews and ratings</p>
+      </div>
+      <button class="btn btn-primary" onclick="openReviewModal()">+ Add Review</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-input" type="text" id="review-search" placeholder="Search reviews..." oninput="filterReviews()"/>
+      </div>
+      <div id="reviews-wrap">
+        <div class="loading"><div class="spinner"></div>Loading reviews...</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ─── Modals ─── -->
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <h3 id="product-modal-title">Add Product</h3>
+    <input type="hidden" id="edit-product-id"/>
+    <div class="form-group">
+      <label>Product Name</label>
+      <input class="form-control" id="f-pname" placeholder="e.g. Razer BlackWidow V4"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Price (৳)</label>
+        <input class="form-control" id="f-price" type="number" placeholder="0.00"/>
+      </div>
+      <div class="form-group">
+        <label>Stock Qty</label>
+        <input class="form-control" id="f-stock" type="number" placeholder="0"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Brand</label>
+        <input class="form-control" id="f-brand" placeholder="Brand name"/>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select class="form-control" id="f-cat"></select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top: 15px;">
+      <label>Assign to Warehouse (per-warehouse stock)</label>
+      <div id="inventory-rows">
+        <div class="inventory-row" style="display:flex;gap:8px;align-items:center;">
+          <select class="form-control inv-wh" style="flex:1">
+            <option value="">Loading warehouses...</option>
+          </select>
+          <input class="form-control inv-qty" type="number" placeholder="Qty" style="width:120px;" />
+          <button type="button" class="btn btn-ghost btn-sm" onclick="this.parentNode.remove()">Remove</button>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-ghost btn-sm" type="button" onclick="addInventoryRow()">Add stock row</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="clearInventoryRows()">Clear</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('product-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal">
+    <h3>Add Category</h3>
+    <div class="form-group">
+      <label>Category Name</label>
+      <input class="form-control" id="f-catname" placeholder="e.g. Keyboards" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('cat-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <h3 id="order-modal-title">Order Details</h3>
+    <div id="order-detail-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('order-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+    <!-- OEM Design Modal -->
+    <div class="modal-overlay" id="oem-modal">
+      <div class="modal">
+        <h3>Add OEM Design</h3>
+        <div class="form-group">
+          <label>Title</label>
+          <input class="form-control" id="o-title" placeholder="e.g. Ultra-Light Ergo Mouse" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" id="o-desc" rows="4" placeholder="Describe the idea..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Features (one per line or JSON)</label>
+          <textarea class="form-control" id="o-features" rows="3" placeholder="sensor: PixArt 3360\nswitches: Kailh GM\nweight: 65g"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input class="form-control" id="o-user" placeholder="optional" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('oem-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveOemDesign()">Submit</button>
+        </div>
+      </div>
+    </div>
+
+        <!-- Review Modal -->
+        <div class="modal-overlay" id="review-modal">
+          <div class="modal">
+            <h3>Add Review</h3>
+            <div class="form-group">
+              <label>Product</label>
+              <select class="form-control" id="r-product">
+                <option value="">Select product</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Rating (1-5 stars)</label>
+              <div id="r-stars" style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm" type="button" onclick="setStars(1)">☆</button>
+                <button class="btn btn-ghost btn-sm" type="button" onclick="setStars(2)">☆</button>
+                <button class="btn btn-ghost btn-sm" type="button" onclick="setStars(3)">☆</button>
+                <button class="btn btn-ghost btn-sm" type="button" onclick="setStars(4)">☆</button>
+                <button class="btn btn-ghost btn-sm" type="button" onclick="setStars(5)">☆</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Emoji rating</label>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" id="emo-bad" onclick="setEmoji('bad')">😡<div style="font-size:12px">Baaje</div></button>
+                <button class="btn btn-ghost btn-sm" id="emo-ok" onclick="setEmoji('ok')">😐<div style="font-size:12px">Mota Moti</div></button>
+                <button class="btn btn-ghost btn-sm" id="emo-good" onclick="setEmoji('good')">😊<div style="font-size:12px">Shera</div></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Short Review</label>
+              <textarea class="form-control" id="r-comment" rows="3" placeholder="One or two lines..."></textarea>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" onclick="closeModal('review-modal')">Cancel</button>
+              <button class="btn btn-primary" onclick="saveReview()">Submit</button>
+            </div>
+          </div>
+        </div>
+
+            <!-- (old login modal removed; login landing page is primary entry now) -->
+
+<script>
+// ─── CONFIG ───
+const API = 'api'; // relative path to your backend api/ folder
+// Change to absolute if needed: const API = 'http://localhost/ezhub-backend/api';
+
+
+// ─── STATE ───
+let allProducts = [];
+let allCategories = [];
+let warehousesCache = [];
+// UI role: 'admin' or 'customer'
+let uiRole = 'admin';
+
+function setRole(role) {
+  uiRole = role === 'customer' ? 'customer' : 'admin';
+  document.documentElement.setAttribute('data-role', uiRole);
+  // role is determined by server session; do not persist locally here
+  // show/hide admin-only controls
+  document.querySelectorAll('[data-admin-only]').forEach(el => {
+    el.style.display = uiRole === 'admin' ? '' : 'none';
+  });
+  // toggle product-name clickable cursor
+  document.querySelectorAll('.product-name').forEach(el => {
+    if (uiRole === 'admin') {
+      el.style.cursor = 'pointer';
+      // keep onclick as is; editProduct will check role
+    } else {
+      el.style.cursor = 'default';
+    }
+  });
+}
+
+// On load, check server session and prefill remembered id
+window.addEventListener('DOMContentLoaded', () => {
+  checkSession();
+  try { const rid = localStorage.getItem('rememberedId'); if (rid) document.getElementById('landing-id').value = rid; } catch(e) {}
+});
+
+async function checkSession() {
+  try {
+    const res = await apiFetch('me.php');
+    if (res && res.user) {
+      const landing = document.getElementById('login-landing'); if (landing) landing.style.display = 'none';
+      const loginBtn = document.getElementById('login-btn'); if (loginBtn) loginBtn.style.display = 'none';
+      const logoutBtn = document.getElementById('logout-btn'); if (logoutBtn) logoutBtn.style.display = '';
+      const ub = document.getElementById('user-badge'); if (ub) ub.textContent = res.user.name + ' (' + res.user.role + ')';
+      setRole(res.user.role === 'admin' ? 'admin' : 'customer');
+      return;
+    }
+  } catch(e) {}
+  // if not logged in, keep landing hidden by default so dashboard is visible
+  // user can open the login landing using the Login button in the sidebar
+  setRole('customer');
+}
+
+// ─── NAVIGATION ───
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    // Remove active class from all links and pages
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Set clicked link to active
+    link.classList.add('active');
+
+    // Show the correct page
+    const page = link.dataset.page;
+    document.getElementById('page-' + page).classList.add('active');
+    
+    // Load specific data for each page
+    if (page === 'products') {
+      loadProducts();
+      loadWarehouses(); // This is the new call
+    }
+    if (page === 'categories') loadCategories();
+    if (page === 'orders') loadOrders();
+    if (page === 'campaigns') loadCampaigns();
+    if (page === 'oemdesigns') loadOemDesigns();
+    if (page === 'reviews') loadReviews();
+    try { localStorage.setItem('lastPage', page); } catch(e) {}
+  });
+});
+
+// ─── TOAST ───
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── MODALS ───
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ─── HELPERS ───
+function stockBadge(qty) {
+  qty = parseInt(qty);
+  if (qty === 0) return '<span class="badge badge-out-stock">Out of Stock</span>';
+  if (qty < 30) return `<span class="badge badge-low-stock">Low · ${qty}</span>`;
+  return `<span class="badge badge-in-stock">In Stock · ${qty}</span>`;
+}
+function statusBadge(s) {
+  return `<span class="badge badge-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+}
+function stars(rating) {
+  if (!rating) return '<span style="color:var(--muted);font-size:12px">No reviews</span>';
+  const full = Math.round(rating);
+  return '<span class="stars">' + '★'.repeat(full) + '☆'.repeat(5-full) + `</span> <span style="color:var(--muted);font-size:11px;font-family:var(--mono)">${parseFloat(rating).toFixed(1)}</span>`;
+}
+function fmt(n) { return '৳' + parseFloat(n).toLocaleString('en-BD'); }
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(`${API}/${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  return res.json();
+}
+
+// --- Authentication helpers ---
+async function login() {
+  const id = document.getElementById('l-id').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  if (!id || !pass) { toast('Enter id and password', 'error'); return; }
+  try {
+    const res = await apiFetch('login.php', { method: 'POST', body: JSON.stringify({ id, password: pass }) });
+    if (res.error) { toast('Login failed: ' + res.error, 'error'); return; }
+    if (res.user) {
+      closeModal('login-modal');
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('logout-btn').style.display = '';
+      document.getElementById('user-badge').textContent = res.user.name + ' (' + res.user.role + ')';
+      setRole(res.user.role === 'admin' ? 'admin' : 'customer');
+      toast('Logged in as ' + res.user.name);
+    }
+  } catch (e) { toast('Login failed', 'error'); }
+}
+
+async function landingLogin() {
+  const id = document.getElementById('landing-id').value.trim();
+  const pass = document.getElementById('landing-pass').value;
+  if (!id || !pass) { toast('Enter id and password', 'error'); return; }
+  // reuse login logic
+  try {
+    const res = await apiFetch('login.php', { method: 'POST', body: JSON.stringify({ id, password: pass }) });
+    if (res.error) { toast('Login failed: ' + res.error, 'error'); return; }
+    if (res.user) {
+      document.getElementById('login-landing').style.display = 'none';
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('logout-btn').style.display = '';
+      document.getElementById('user-badge').textContent = res.user.name + ' (' + res.user.role + ')';
+      setRole(res.user.role === 'admin' ? 'admin' : 'customer');
+      // remember id if requested
+      try { if (document.getElementById('remember-me').checked) localStorage.setItem('rememberedId', id); else localStorage.removeItem('rememberedId'); } catch(e) {}
+      // redirect to last opened page if available
+      try {
+        const lp = localStorage.getItem('lastPage');
+        if (lp) {
+          document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+          const link = document.querySelector('.nav-link[data-page="' + lp + '"]');
+          if (link) {
+            link.classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const pageEl = document.getElementById('page-' + lp);
+            if (pageEl) pageEl.classList.add('active');
+            if (lp === 'products') { loadProducts(); loadWarehouses(); }
+            if (lp === 'categories') loadCategories();
+            if (lp === 'orders') loadOrders();
+            if (lp === 'campaigns') loadCampaigns();
+            if (lp === 'oemdesigns') loadOemDesigns();
+            if (lp === 'reviews') loadReviews();
+          }
+        }
+      } catch (e) {}
+      toast('Logged in as ' + res.user.name);
+    }
+  } catch(e) { toast('Login failed', 'error'); }
+}
+
+async function landingRegister() {
+  const id = document.getElementById('landing-id').value.trim();
+  const pass = document.getElementById('landing-pass').value;
+  if (!id || !pass) { toast('Enter id and password', 'error'); return; }
+  try {
+    const res = await apiFetch('register.php', { method: 'POST', body: JSON.stringify({ id, password: pass }) });
+    if (res.error) { toast('Registration failed: ' + res.error, 'error'); return; }
+    if (res.user) {
+      document.getElementById('login-landing').style.display = 'none';
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('logout-btn').style.display = '';
+      document.getElementById('user-badge').textContent = res.user.name + ' (' + res.user.role + ')';
+      setRole('customer');
+      try { if (document.getElementById('remember-me').checked) localStorage.setItem('rememberedId', id); else localStorage.removeItem('rememberedId'); } catch(e) {}
+      toast('Account created and logged in as ' + res.user.name);
+    }
+  } catch(e) { toast('Registration failed', 'error'); }
+}
+
+async function logout() {
+  try {
+    await apiFetch('logout.php', { method: 'POST' });
+  } catch(e) {}
+  document.getElementById('login-btn').style.display = '';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('user-badge').textContent = '';
+  setRole('customer');
+  const landing = document.getElementById('login-landing'); if (landing) landing.style.display = '';
+  toast('Logged out');
+}
+
+// check server session and update UI
+async function checkSession() {
+  try {
+    const res = await apiFetch('me.php');
+    if (res.user) {
+      document.getElementById('login-landing').style.display = 'none';
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('logout-btn').style.display = '';
+      document.getElementById('user-badge').textContent = res.user.name + ' (' + res.user.role + ')';
+      setRole(res.user.role === 'admin' ? 'admin' : 'customer');
+      return;
+    }
+  } catch (e) { /* ignore */ }
+  // default to customer if no session
+  setRole('customer');
+  // show landing page if not logged in
+  const landing = document.getElementById('login-landing'); if (landing) landing.style.display = '';
+}
+
+// Try to restore session on load
+window.addEventListener('load', () => { checkSession(); });
+
+// ─── DASHBOARD ───
+async function loadDashboard() {
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-BD', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Stats (with fallback mock for demo if backend not connected)
+  try {
+    const s = await apiFetch('stats.php');
+    const pending = s.orders?.pending || 0;
+    const confirmed = s.orders?.confirmed || 0;
+    const cancelled = s.orders?.cancelled || 0;
+    document.getElementById('stats-grid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-label">Revenue</div>
+        <div class="stat-value">${fmt(s.total_revenue || 0)}</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value">${pending}</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Confirmed</div>
+        <div class="stat-value">${confirmed}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Products</div>
+        <div class="stat-value">${s.total_products || 0}</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Low Stock</div>
+        <div class="stat-value">${s.low_stock || 0}</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Customers</div>
+        <div class="stat-value">${s.total_customers || 0}</div>
+      </div>
+    `;
+  } catch(e) {
+    // Demo fallback
+    document.getElementById('stats-grid').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value">৳6,000</div></div>
+      <div class="stat-card orange"><div class="stat-label">Pending</div><div class="stat-value">1</div></div>
+      <div class="stat-card green"><div class="stat-label">Confirmed</div><div class="stat-value">1</div></div>
+      <div class="stat-card"><div class="stat-label">Products</div><div class="stat-value">4</div></div>
+      <div class="stat-card red"><div class="stat-label">Low Stock</div><div class="stat-value">0</div></div>
+      <div class="stat-card blue"><div class="stat-label">Customers</div><div class="stat-value">3</div></div>
+    `;
+  }
+
+  // Recent orders & campaigns
+  try {
+    const orders = await apiFetch('orders.php');
+    const recent = orders.slice(0,5);
+    document.getElementById('recent-orders-list').innerHTML = recent.length ? recent.map(o => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;font-weight:500">${o.customer_name || 'User #'+o.user_id}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${o.order_id} · ${new Date(o.order_date).toLocaleDateString()}</div>
+        </div>
+        <div style="text-align:right">
+          ${statusBadge(o.status)}
+          <div style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:4px">${fmt(o.total_price)}</div>
+        </div>
+      </div>
+    `).join('') : '<div class="empty"><div class="empty-icon">◫</div>No orders yet</div>';
+  } catch(e) {
+    document.getElementById('recent-orders-list').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:20px 0">Connect backend to see orders</div>';
+  }
+
+  try {
+    const camps = await apiFetch('campaigns.php');
+    const active = camps.filter(c => c.status === 'active').slice(0,3);
+    document.getElementById('dash-campaigns').innerHTML = active.length ? active.map(c => {
+      const pct = Math.min(100, parseFloat(c.progress_pct));
+      return `
+        <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">${c.product_name}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted)">
+            <span>${c.curr_participants}/${c.min_participants} joined</span>
+            <span>${pct}%</span>
+          </div>
+        </div>
+      `;
+    }).join('') : '<div style="color:var(--muted);font-size:12px;padding:20px 0">No active campaigns</div>';
+  } catch(e) {
+    document.getElementById('dash-campaigns').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:20px 0">Connect backend to see campaigns</div>';
+  }
+}
+
+// ─── PRODUCTS ───
+async function loadProducts() {
+  try {
+    allProducts = await apiFetch('products.php');
+    await loadCategoriesForFilter();
+    renderProducts(allProducts);
+  } catch(e) {
+    document.getElementById('products-table-wrap').innerHTML = '<div class="empty"><div class="empty-icon">⊞</div>Could not load products. Check backend connection.</div>';
+  }
+}
+
+async function loadCategoriesForFilter() {
+  try {
+    allCategories = await apiFetch('categories.php');
+    const sel = document.getElementById('cat-filter');
+    sel.innerHTML = '<option value="">All Categories</option>' +
+      allCategories.map(c => `<option value="${c.category_id}">${c.category_name}</option>`).join('');
+    const fcat = document.getElementById('f-cat');
+    if (fcat) fcat.innerHTML = allCategories.map(c => `<option value="${c.category_id}">${c.category_name}</option>`).join('');
+  } catch(e) {}
+}
+
+function filterProducts() {
+  const q = document.getElementById('product-search').value.toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const filtered = allProducts.filter(p => {
+    const matchQ = !q || p.product_name.toLowerCase().includes(q) || p.brand_name.toLowerCase().includes(q);
+    const matchC = !cat || String(p.category_id) === cat;
+    return matchQ && matchC;
+  });
+  renderProducts(filtered);
+}
+
+function renderProducts(products) {
+  if (!products.length) {
+    document.getElementById('products-table-wrap').innerHTML = '<div class="empty"><div class="empty-icon">⊞</div>No products found</div>';
+    return;
+  }
+  document.getElementById('products-table-wrap').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Product</th>
+        <th>Category</th>
+        <th>Warehouses</th>
+        <th>Price</th>
+        <th>Total</th>
+        <th>Stock</th>
+        <th>Rating</th>
+        <th>Actions</th>
+      </tr></thead>
+      <tbody>
+        ${products.map(p => `
+          <tr>
+            <td>
+              <div class="product-name" style="cursor:pointer" onclick="editProduct(${p.product_id})">${p.product_name}</div>
+              <div class="brand">${p.brand_name}</div>
+            </td>
+            <td><span style="font-size:12px;color:var(--muted)">${p.category_name || '—'}</span></td>
+            <td style="font-size:12px;color:var(--muted)">${(p.warehouses || []).map(w => `${w.location} (${w.stock_quantity})`).join('<br>') || '—'}</td>
+            <td><span class="price">${fmt(p.price)}</span></td>
+            <td style="font-family:var(--mono);">${(p.warehouses || []).reduce((s,w)=>s+parseInt(w.stock_quantity||0),0) || p.stock_quantity || 0}</td>
+            <td>${stockBadge((p.warehouses || []).reduce((s,w)=>s+parseInt(w.stock_quantity||0),0) || p.stock_quantity)}</td>
+            <td>${stars(p.avg_rating)}</td>
+            <td>
+              <button class="btn btn-ghost btn-sm" data-admin-only onclick="editProduct(${p.product_id})">Edit</button>
+              <button class="btn btn-danger btn-sm" data-admin-only onclick="deleteProduct(${p.product_id}, '${p.product_name.replace(/'/g,"\\'")}')">Delete</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function openProductModal(data = null) {
+  document.getElementById('product-modal-title').textContent = data ? 'Edit Product' : 'Add Product';
+  document.getElementById('edit-product-id').value = data ? data.product_id : '';
+  document.getElementById('f-pname').value = data ? data.product_name : '';
+  document.getElementById('f-price').value = data ? data.price : '';
+  document.getElementById('f-stock').value = data ? data.stock_quantity : '';
+  document.getElementById('f-brand').value = data ? data.brand_name : '';
+  // Populate category dropdown
+  const fcat = document.getElementById('f-cat');
+  fcat.innerHTML = allCategories.map(c =>
+    `<option value="${c.category_id}" ${data && data.category_id == c.category_id ? 'selected' : ''}>${c.category_name}</option>`
+  ).join('');
+  // Ensure warehouses are loaded and selection is set before opening modal
+  try {
+    const wh = await loadWarehouses();
+    // clear existing inventory rows
+    const container = document.getElementById('inventory-rows');
+    container.innerHTML = '';
+    if (data && data.warehouses && data.warehouses.length) {
+      data.warehouses.forEach(w => addInventoryRow(w.warehouse_id, w.stock_quantity));
+    } else {
+      // add one empty row
+      addInventoryRow();
+    }
+  } catch (e) {
+    console.warn('Failed loading warehouses for modal', e);
+    // fallback: ensure one row exists
+    const container = document.getElementById('inventory-rows');
+    if (!container.querySelector('.inventory-row')) addInventoryRow();
+  }
+
+  openModal('product-modal');
+}
+
+function addInventoryRow(wid = '', qty = '') {
+  const container = document.getElementById('inventory-rows');
+  const div = document.createElement('div');
+  div.className = 'inventory-row';
+  div.style = 'display:flex;gap:8px;align-items:center;margin-top:8px;';
+  div.innerHTML = `
+    <select class="form-control inv-wh" style="flex:1"></select>
+    <input class="form-control inv-qty" type="number" placeholder="Qty" style="width:120px;" />
+    <button type="button" class="btn btn-ghost btn-sm">Remove</button>
+  `;
+  container.appendChild(div);
+  const removeBtn = div.querySelector('button');
+  removeBtn.addEventListener('click', () => div.remove());
+
+  // populate warehouse options (copy from a loaded select)
+  const sel = div.querySelector('.inv-wh');
+  // Prefer cloning from any existing populated .inv-wh
+  const existing = document.querySelector('.inv-wh');
+  if (warehousesCache && warehousesCache.length) {
+    sel.innerHTML = '<option value="">Assign to warehouse</option>';
+    warehousesCache.forEach(item => {
+      const id = item.warehouse_id ?? item.id ?? item.warehouseId;
+      const label = item.location ?? item.name ?? item.location_name ?? String(id);
+      if (id == null) return;
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+  } else if (existing && existing.options && existing.options.length > 0) {
+    // clone options from the first existing .inv-wh
+    sel.innerHTML = existing.innerHTML;
+  } else {
+    // fallback: show placeholder and trigger a load to populate later
+    sel.innerHTML = '<option value="">Loading warehouses...</option>';
+    // attempt to (re)load warehouses so options become available
+    loadWarehouses().catch(() => {});
+  }
+  if (wid) sel.value = wid;
+  if (qty !== '') div.querySelector('.inv-qty').value = qty;
+}
+
+function clearInventoryRows() {
+  const container = document.getElementById('inventory-rows');
+  container.innerHTML = '';
+  addInventoryRow();
+}
+
+async function editProduct(id) {
+  if (uiRole !== 'admin') { toast('Admin only', 'error'); return; }
+  try {
+    const p = await apiFetch(`products.php?id=${id}`);
+    openProductModal(p);
+  } catch(e) { toast('Error loading product', 'error'); }
+}
+
+async function saveProduct() {
+  if (uiRole !== 'admin') { toast('Admin only', 'error'); return; }
+  const id = document.getElementById('edit-product-id').value;
+  
+  const data = {
+    product_name: document.getElementById('f-pname').value.trim(),
+    price: parseFloat(document.getElementById('f-price').value),
+    brand_name: document.getElementById('f-brand').value.trim(),
+    category_id: parseInt(document.getElementById('f-cat').value),
+    // legacy fallback
+    stock_quantity: parseInt(document.getElementById('f-stock').value) || 0,
+    inventory: []
+  };
+
+  // collect dynamic inventory rows
+  document.querySelectorAll('#inventory-rows .inventory-row').forEach(row => {
+    const widEl = row.querySelector('.inv-wh');
+    const qtyEl = row.querySelector('.inv-qty');
+    if (!widEl || !qtyEl) return;
+    const wid = parseInt(widEl.value);
+    const qty = parseInt(qtyEl.value) || 0;
+    if (wid) data.inventory.push({ warehouse_id: wid, stock_quantity: qty });
+  });
+
+  if (!data.product_name || isNaN(data.price)) {
+    toast('Please fill required fields: name and price', 'error'); 
+    return;
+  }
+
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `products.php?id=${id}` : 'products.php';
+    
+    await apiFetch(url, { 
+      method, 
+      body: JSON.stringify(data) 
+    });
+
+    closeModal('product-modal');
+    toast(id ? 'Product updated!' : 'Product added!');
+    loadProducts(); // Refreshes the list
+  } catch(e) { 
+    toast('Error saving product', 'error'); 
+  }
+}
+
+async function deleteProduct(id, name) {
+  if (uiRole !== 'admin') { toast('Admin only', 'error'); return; }
+  if (!confirm(`Delete "${name}"?`)) return;
+  try {
+    await apiFetch(`products.php?id=${id}`, { method: 'DELETE' });
+    toast('Product deleted');
+    loadProducts();
+  } catch(e) { toast('Error deleting product', 'error'); }
+}
+
+// ─── CATEGORIES ───
+async function loadCategories() {
+  try {
+    allCategories = await apiFetch('categories.php');
+    if (!allCategories.length) {
+      document.getElementById('categories-wrap').innerHTML = '<div class="empty"><div class="empty-icon">◈</div>No categories yet</div>';
+      return;
+    }
+    document.getElementById('categories-wrap').innerHTML = `
+      <div class="cat-grid">
+        ${allCategories.map(c => `
+          <div class="cat-card" onclick="showCategoryProducts(${c.category_id})" style="cursor:pointer">
+            <div>
+              <div class="cat-name">${c.category_name}</div>
+              <div class="cat-count">${c.product_count} product${c.product_count != 1 ? 's' : ''}</div>
+            </div>
+            <button class="btn btn-danger btn-sm cat-delete" data-admin-only onclick="event.stopPropagation(); deleteCategory(${c.category_id}, '${c.category_name.replace(/'/g,"\\'")}')">✕</button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('categories-wrap').innerHTML = '<div class="empty">Could not load categories</div>';
+  }
+}
+
+// Show products that belong to a given category id
+function showCategoryProducts(catId) {
+  // Ensure products are loaded
+  if (!allProducts || !allProducts.length) {
+    loadProducts().then(() => showCategoryProducts(catId)).catch(() => toast('Products not available','error'));
+    return;
+  }
+  const filtered = allProducts.filter(p => String(p.category_id) === String(catId));
+  // Switch to products page and render filtered
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const prodLink = document.querySelector('.nav-link[data-page="products"]');
+  if (prodLink) prodLink.classList.add('active');
+  document.getElementById('page-products').classList.add('active');
+  renderProducts(filtered);
+}
+
+function openCatModal() { if (uiRole !== 'admin') { toast('Admin only', 'error'); return; } document.getElementById('f-catname').value = ''; openModal('cat-modal'); }
+
+async function saveCategory() {
+  if (uiRole !== 'admin') { toast('Admin only', 'error'); return; }
+  const name = document.getElementById('f-catname').value.trim();
+  if (!name) { toast('Enter a category name', 'error'); return; }
+  try {
+    await apiFetch('categories.php', { method: 'POST', body: JSON.stringify({ category_name: name }) });
+    closeModal('cat-modal');
+    toast('Category added!');
+    loadCategories();
+  } catch(e) { toast('Error adding category', 'error'); }
+}
+
+async function deleteCategory(id, name) {
+  if (uiRole !== 'admin') { toast('Admin only', 'error'); return; }
+  if (!confirm(`Delete category "${name}"? Products in it may be affected.`)) return;
+  try {
+    await apiFetch(`categories.php?id=${id}`, { method: 'DELETE' });
+    toast('Category deleted');
+    loadCategories();
+  } catch(e) { toast('Error deleting category', 'error'); }
+}
+
+// ─── ORDERS ───
+async function loadOrders() {
+  const status = document.getElementById('status-filter').value;
+  const url = status ? `orders.php?status=${status}` : 'orders.php';
+  try {
+    const orders = await apiFetch(url);
+    if (!orders.length) {
+      document.getElementById('orders-table-wrap').innerHTML = '<div class="empty"><div class="empty-icon">◫</div>No orders found</div>';
+      return;
+    }
+    document.getElementById('orders-table-wrap').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody>
+          ${orders.map(o => `
+            <tr>
+              <td><span style="font-family:var(--mono);color:var(--muted)">#${o.order_id}</span></td>
+              <td><span style="font-weight:500">${o.customer_name || 'User #'+o.user_id}</span></td>
+              <td><span style="font-size:12px;color:var(--muted)">${new Date(o.order_date).toLocaleDateString('en-BD')}</span></td>
+              <td><span class="price">${fmt(o.total_price)}</span></td>
+              <td>${statusBadge(o.status)}</td>
+              <td>
+                <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.order_id})">Details</button>
+                ${o.status === 'pending' ? `
+                  <button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${o.order_id},'confirmed')">Confirm</button>
+                  <button class="btn btn-danger btn-sm" onclick="updateOrderStatus(${o.order_id},'cancelled')">Cancel</button>
+                ` : ''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch(e) {
+    document.getElementById('orders-table-wrap').innerHTML = '<div class="empty">Could not load orders. Check backend connection.</div>';
+  }
+}
+
+async function viewOrder(id) {
+  try {
+    const o = await apiFetch(`orders.php?id=${id}`);
+    document.getElementById('order-modal-title').textContent = `Order #${id}`;
+    document.getElementById('order-detail-content').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div><div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">CUSTOMER</div><div>${o.customer_name}</div><div style="font-size:12px;color:var(--muted)">${o.customer_email}</div></div>
+        <div><div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">STATUS</div>${statusBadge(o.status)}</div>
+        <div><div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">DATE</div><div style="font-size:13px">${new Date(o.order_date).toLocaleString()}</div></div>
+        <div><div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">TOTAL</div><div class="price" style="font-size:18px">${fmt(o.total_price)}</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">Items</div>
+      <div class="order-items-list">
+        ${(o.items || []).map(i => `
+          <div class="order-item-row">
+            <span>${i.product_name} <span style="color:var(--muted)">× ${i.quantity}</span></span>
+            <span class="price">${fmt(i.price * i.quantity)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    openModal('order-modal');
+  } catch(e) { toast('Error loading order details', 'error'); }
+}
+
+async function updateOrderStatus(id, status) {
+  try {
+    await apiFetch(`orders.php?id=${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
+    toast(`Order ${status}!`);
+    loadOrders();
+  } catch(e) { toast('Error updating order', 'error'); }
+}
+
+// ─── CAMPAIGNS (Unique Feature 1: Group Buy Tracker) ───
+async function loadCampaigns() {
+  try {
+    const camps = await apiFetch('campaigns.php');
+    if (!camps.length) {
+      document.getElementById('campaigns-wrap').innerHTML = '<div class="empty"><div class="empty-icon">⚡</div>No campaigns found</div>';
+      return;
+    }
+    document.getElementById('campaigns-wrap').innerHTML = `
+      <div class="campaigns-grid">
+        ${camps.map(c => {
+          const pct = Math.min(100, parseFloat(c.progress_pct) || 0);
+          const full = pct >= 100;
+          const hoursLeft = parseInt(c.hours_left);
+          const timeLabel = c.status === 'active'
+            ? (hoursLeft > 0 ? `⏱ ${hoursLeft}h left` : 'Ending soon')
+            : (c.status === 'completed' ? '✓ Completed' : '✕ Cancelled');
+          return `
+            <div class="campaign-card ${c.status}">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+                <div class="campaign-product">${c.product_name}</div>
+                ${statusBadge(c.status)}
+              </div>
+              <div class="campaign-brand">${c.brand_name}</div>
+              
+              <!-- Unique Feature: Live progress bar with participant count -->
+              <div class="progress-label">
+                <span>Group Buy Progress</span>
+                <span style="color:${full?'var(--success)':'var(--accent)'}">${pct}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill ${full?'full':''}" style="width:${pct}%"></div>
+              </div>
+
+              <div style="display:flex;gap:16px;font-family:var(--mono);font-size:12px;margin-bottom:12px">
+                <div>
+                  <div style="color:var(--muted);margin-bottom:2px">Joined</div>
+                  <div style="font-size:18px;font-weight:600;color:var(--accent)">${c.curr_participants}</div>
+                </div>
+                <div>
+                  <div style="color:var(--muted);margin-bottom:2px">Target</div>
+                  <div style="font-size:18px;font-weight:600">${c.min_participants}</div>
+                </div>
+                <div>
+                  <div style="color:var(--muted);margin-bottom:2px">Needed</div>
+                  <div style="font-size:18px;font-weight:600;color:${parseInt(c.spots_left)<=0?'var(--success)':'var(--text)'}">${Math.max(0, c.spots_left)}</div>
+                </div>
+              </div>
+
+              <div class="campaign-meta">
+                <div class="countdown ${hoursLeft <= 0 ? 'expired' : ''}">${timeLabel}</div>
+                ${c.status === 'active' ? `<button class="btn btn-primary btn-sm" onclick="joinCampaign(${c.campaign_id})">Join Deal</button>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div style="margin-top:20px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:12px;color:var(--muted)">
+        <strong style="color:var(--accent)">⚡ How Group Buy works:</strong> When enough customers join a campaign, the deal is unlocked for everyone. Progress bars update in real time as participants join.
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('campaigns-wrap').innerHTML = '<div class="empty">Could not load campaigns. Check backend connection.</div>';
+  }
+}
+
+// ─── OEM DESIGNS ───
+async function loadOemDesigns() {
+  try {
+    const list = await apiFetch('oemdesigns.php');
+    if (!list || !list.length) {
+      document.getElementById('oemdesigns-wrap').innerHTML = '<div class="empty"><div class="empty-icon">✦</div>No OEM designs yet</div>';
+      return;
+    }
+    document.getElementById('oemdesigns-wrap').innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+        ${list.map(d => `
+          <div style="background:var(--surface);border:1px solid var(--border);padding:12px;border-radius:10px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div style="font-weight:600">${d.title}</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">${new Date(d.created_at).toLocaleDateString()}</div>
+            </div>
+            <div style="color:var(--muted);font-size:13px;margin-top:8px">${d.description || ''}</div>
+            <div style="margin-top:8px;font-size:13px;color:var(--muted);">
+              <strong>Features:</strong>
+              <div style="font-family:var(--mono);font-size:12px;margin-top:6px">${renderFeatures(d.features)}</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+              <button class="btn btn-ghost btn-sm" onclick="voteOem(${d.design_id}, 'upvote')">▲ ${d.upvotes}</button>
+              <button class="btn btn-ghost btn-sm" onclick="voteOem(${d.design_id}, 'downvote')">▼ ${d.downvotes}</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (e) {
+    document.getElementById('oemdesigns-wrap').innerHTML = '<div class="empty">Could not load OEM designs</div>';
+  }
+}
+
+// ─── REVIEWS HELPERS & API ───
+let currentStars = 0;
+let currentEmoji = '';
+
+function setStars(n) {
+  currentStars = n;
+  const buttons = document.querySelectorAll('#r-stars button');
+  buttons.forEach((b, i) => { b.textContent = i+1 <= n ? '★' : '☆'; });
+}
+
+function setEmoji(name) {
+  currentEmoji = name;
+  ['emo-bad','emo-ok','emo-good'].forEach(id => {
+    const e = document.getElementById(id);
+    if (!e) return;
+    e.classList.remove('active'); e.classList.remove('bad'); e.classList.remove('ok'); e.classList.remove('good');
+  });
+  const el = document.getElementById('emo-' + (name === 'bad' ? 'bad' : name === 'ok' ? 'ok' : 'good'));
+  if (el) {
+    el.classList.add('active');
+    el.classList.add(name === 'bad' ? 'bad' : name === 'ok' ? 'ok' : 'good');
+  }
+}
+
+async function openReviewModal() {
+  // ensure products are loaded so dropdown can populate
+  if (!allProducts || !allProducts.length) {
+    try { await loadProducts(); } catch(e) { /* ignore */ }
+  }
+  // populate product select
+  const prodSel = document.getElementById('r-product');
+  prodSel.innerHTML = '<option value="">Select product</option>' + (allProducts || []).map(p => `<option value="${p.product_id}">${p.product_name}</option>`).join('');
+  prodSel.value = '';
+  document.getElementById('r-comment').value = '';
+  setStars(0); currentEmoji = '';
+  ['emo-bad','emo-ok','emo-good'].forEach(id => document.getElementById(id).classList.remove('active'));
+  openModal('review-modal');
+}
+
+async function saveReview() {
+  const product_id = parseInt(document.getElementById('r-product').value) || 0;
+  if (!product_id) { toast('Enter product id', 'error'); return; }
+  if (!currentStars && !currentEmoji) { toast('Choose a rating', 'error'); return; }
+  const comment = document.getElementById('r-comment').value.trim();
+  const rating = currentStars || (currentEmoji === 'bad' ? 1 : currentEmoji === 'ok' ? 3 : 5);
+  try {
+    // Don't send user_id here; backend will default to a valid system user if omitted
+    const res = await apiFetch('reviews.php', { method: 'POST', body: JSON.stringify({ product_id, rating, comment }) });
+    if (res.error) { toast('Error: ' + res.error, 'error'); return; }
+    closeModal('review-modal'); toast('Review submitted!'); loadReviews();
+  } catch (e) { toast('Error submitting review', 'error'); }
+}
+
+// Search/filter reviews by product name, comment, or rating
+function filterReviews() {
+  const q = document.getElementById('review-search').value.trim().toLowerCase();
+  const wrap = document.getElementById('reviews-wrap');
+  if (!wrap) return;
+  // Simple client-side filter: re-fetch and filter in-memory for now
+  // (small dataset expected in admin UI)
+  // Use server-side search for better results and to support large datasets
+  apiFetch('reviews.php?search=' + encodeURIComponent(q)).then(list => {
+    if (!list) { wrap.innerHTML = '<div class="empty">No reviews</div>'; return; }
+    const filtered = list.filter(r => {
+      if (!q) return true;
+      // server already filtered but keep client-side fallback
+      const pname = (r.product_name || '').toString().toLowerCase();
+      const comment = (r.comment || '').toString().toLowerCase();
+      const rating = (r.rating || '').toString();
+      const uname = (r.user_name || '').toString().toLowerCase();
+      return pname.includes(q) || comment.includes(q) || rating === q || uname.includes(q);
+    });
+    if (!filtered.length) { wrap.innerHTML = '<div class="empty">No reviews match"</div>'; return; }
+    wrap.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;padding:12px">
+        ${filtered.map(r => `
+          <div style="background:var(--surface2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:600">${r.product_name ? r.product_name : 'Product #' + r.product_id}</div>
+                <div style="font-size:12px;color:var(--muted)">${r.user_name ? r.user_name : 'User #' + r.user_id}</div>
+              </div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">${new Date(r.created_at).toLocaleDateString()}</div>
+            </div>
+            <div style="margin-top:6px">${renderStarsInline(r.rating)} <span style="margin-left:8px">${badgeForRating(r.rating)}</span></div>
+            <div style="margin-top:8px;color:var(--muted)">${r.comment || ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).catch(() => { wrap.innerHTML = '<div class="empty">Could not load reviews</div>'; });
+}
+
+async function loadReviews() {
+  try {
+    const list = await apiFetch('reviews.php');
+    if (!list || !list.length) { document.getElementById('reviews-wrap').innerHTML = '<div class="empty">No reviews yet</div>'; return; }
+    document.getElementById('reviews-wrap').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;padding:12px">
+        ${list.map(r => `
+          <div style="background:var(--surface2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:600">${r.product_name ? r.product_name : 'Product #' + r.product_id}</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">${new Date(r.created_at).toLocaleDateString()}</div>
+            </div>
+            <div style="margin-top:6px">${renderStarsInline(r.rating)} <span style="margin-left:8px">${badgeForRating(r.rating)}</span></div>
+            <div style="margin-top:8px;color:var(--muted)">${r.comment || ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (e) { document.getElementById('reviews-wrap').innerHTML = '<div class="empty">Could not load reviews</div>'; }
+}
+
+function renderStarsInline(n) { n = parseInt(n)||0; return '★'.repeat(n) + '☆'.repeat(5-n); }
+function emojiForRating(n) { n = parseInt(n)||0; if (n <= 2) return '😡'; if (n === 3) return '😐'; return '😊'; }
+function badgeForRating(n) {
+  n = parseInt(n)||0;
+  if (n <= 2) return `<span class="emoji-badge bad">😡 Baaje</span>`;
+  if (n === 3) return `<span class="emoji-badge ok">😐 Mota Moti</span>`;
+  return `<span class="emoji-badge good">😊 Shera</span>`;
+}
+
+function renderFeatures(raw) {
+  if (!raw) return '—';
+  try {
+    // raw could be JSON string or simple text
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(f => typeof f === 'object' ? Object.entries(f).map(kv=>kv.join(': ')).join(', ') : String(f)).join('<br>');
+    if (typeof parsed === 'object') return Object.entries(parsed).map(kv=>kv.join(': ')).join('<br>');
+  } catch(e) {
+    // plain text: split lines
+    return raw.split('\n').map(l => l.trim()).filter(Boolean).join('<br>');
+  }
+  return String(raw);
+}
+
+function openOemModal() { document.getElementById('o-title').value=''; document.getElementById('o-desc').value=''; document.getElementById('o-features').value=''; document.getElementById('o-user').value=''; openModal('oem-modal'); }
+
+async function saveOemDesign() {
+  if (uiRole !== 'admin') { toast('Admin only', 'error'); return; }
+  const title = document.getElementById('o-title').value.trim();
+  if (!title) { toast('Title required', 'error'); return; }
+  const desc = document.getElementById('o-desc').value.trim();
+  const featsRaw = document.getElementById('o-features').value.trim();
+  // try to parse as JSON, otherwise split lines into key:val pairs or simple list
+  let features = null;
+  try { features = JSON.parse(featsRaw); } catch(e) {
+    if (featsRaw) {
+      features = featsRaw.split('\n').map(l=>l.trim()).filter(Boolean).map(l => {
+        const idx = l.indexOf(':');
+        if (idx > 0) return { [l.slice(0,idx).trim()]: l.slice(idx+1).trim() };
+        return l;
+      });
+    }
+  }
+
+  try {
+    const payload = { title, description: desc, features, user_name: document.getElementById('o-user').value.trim() };
+    console.debug('saveOemDesign: payload', payload);
+    // call directly so we can inspect status and body
+    const res = await fetch(`${API}/oemdesigns.php`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    let json;
+    try { json = await res.json(); } catch (e) { console.error('saveOemDesign: failed to parse json', e); }
+    console.debug('saveOemDesign: response', res.status, json);
+    if (!res.ok || (json && json.error)) {
+      const msg = (json && json.error) ? json.error : `Status ${res.status}`;
+      toast('Error submitting design: ' + msg, 'error');
+      return;
+    }
+    closeModal('oem-modal');
+    toast('Design submitted!');
+    loadOemDesigns();
+  } catch (e) { console.error('saveOemDesign exception', e); toast('Error submitting design: ' + (e.message || e), 'error'); }
+}
+
+async function voteOem(id, action) {
+  try {
+    // send as PUT with action param
+    await fetch(`${API}/oemdesigns.php?id=${id}`, { method: 'PUT', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body: `action=${action}` });
+    loadOemDesigns();
+  } catch (e) { toast('Vote failed', 'error'); }
+}
+
+async function joinCampaign(id) {
+  const userId = prompt('Enter your User ID to join:');
+  if (!userId) return;
+  try {
+    const res = await apiFetch('campaigns.php', {
+      method: 'POST',
+      body: JSON.stringify({ campaign_id: id, user_id: parseInt(userId) })
+    });
+    if (res.error) throw new Error(res.error);
+    toast(res.message || 'Joined!');
+    loadCampaigns();
+  } catch(e) { toast(e.message || 'Error joining campaign', 'error'); }
+}
+
+async function loadWarehouses() {
+  try {
+    console.debug('loadWarehouses: start');
+    // collect inventory selects (these are the ones used inside the modal rows)
+    const invSelects = Array.from(document.querySelectorAll('.inv-wh'));
+    // legacy/other select (if present)
+    const legacySel = document.querySelector('#prod-warehouse') || document.querySelector('#f-warehouse') || document.querySelector('select[name="warehouse_id"]') || document.querySelector('.warehouse-select');
+
+    // set placeholders immediately so user sees change
+    if (legacySel) legacySel.innerHTML = '<option value="">Assign to warehouse</option>';
+    if (invSelects.length) invSelects.forEach(s => s.innerHTML = '<option value="">Loading warehouses...</option>');
+
+    console.debug('loadWarehouses: fetching', `${API}/warehouse.php`);
+    const res = await fetch(`${API}/warehouse.php`);
+    console.debug('loadWarehouses: fetch done, status=', res.status);
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      console.error('loadWarehouses: failed to parse JSON', e);
+      if (legacySel) legacySel.innerHTML = '<option>Error parsing warehouse data</option>';
+      invSelects.forEach(s => s.innerHTML = '<option>Error parsing warehouse data</option>');
+      throw e;
+    }
+
+    if (!res.ok) {
+      console.error('loadWarehouses: non-ok response', res.status, data);
+      if (legacySel) legacySel.innerHTML = `<option>Error loading warehouses (${res.status})</option>`;
+      invSelects.forEach(s => s.innerHTML = `<option>Error loading warehouses (${res.status})</option>`);
+      throw new Error(data?.error || 'Failed to fetch warehouses');
+    }
+
+    console.debug('loadWarehouses: data received', data && data.length);
+
+  // cache data for later use (so newly created rows can populate immediately)
+  warehousesCache = data || [];
+
+  // populate legacy select if present
+    if (legacySel) {
+      // clear and add placeholder
+      legacySel.innerHTML = '<option value="">Assign to warehouse</option>';
+      data.forEach(item => {
+        const id = item.warehouse_id ?? item.id ?? item.warehouseId;
+        const label = item.location ?? item.name ?? item.location_name ?? String(id);
+        if (id == null) return;
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = label;
+        legacySel.appendChild(opt);
+      });
+      console.debug('loadWarehouses: populated legacy select', legacySel.options.length);
+    }
+
+    // populate any inventory-row selects (.inv-wh)
+    if (invSelects.length) {
+      invSelects.forEach(s => {
+        s.innerHTML = '<option value="">Assign to warehouse</option>';
+        data.forEach(item => {
+          const id = item.warehouse_id ?? item.id ?? item.warehouseId;
+          const label = item.location ?? item.name ?? item.location_name ?? String(id);
+          if (id == null) return;
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = label;
+          s.appendChild(opt);
+        });
+      });
+      console.debug('loadWarehouses: populated .inv-wh selects', invSelects.length);
+    }
+
+    return data;
+  } catch (err) {
+    console.error('loadWarehouses error:', err);
+    warehousesCache = [];
+    const legacySel = document.querySelector('#prod-warehouse') || document.querySelector('#f-warehouse') || document.querySelector('select[name="warehouse_id"]') || document.querySelector('.warehouse-select');
+    const invSelects = Array.from(document.querySelectorAll('.inv-wh'));
+    if (legacySel) legacySel.innerHTML = '<option>Error loading warehouses</option>';
+    if (invSelects.length) invSelects.forEach(s => s.innerHTML = '<option>Error loading warehouses</option>');
+    if (typeof toast === 'function') toast('Error loading warehouses: ' + (err.message || err), 'error');
+    throw err;
+  }
+}
+
+// ─── INIT ───
+loadDashboard();
+</script>
+</body>
+</html>
